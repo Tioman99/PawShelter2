@@ -4,6 +4,7 @@ import dk.lucashermann.pawshelter2.dataTransferObjects.UserDTO;
 import dk.lucashermann.pawshelter2.models.User;
 import dk.lucashermann.pawshelter2.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -12,6 +13,7 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class UserServices {
     private final UserRepository userRepository;
 
