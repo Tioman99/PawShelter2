@@ -4,6 +4,7 @@ import dk.lucashermann.pawshelter2.dataTransferObjects.UserDTO;
 import dk.lucashermann.pawshelter2.models.User;
 import dk.lucashermann.pawshelter2.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -30,12 +31,13 @@ public class UserServices {
     }
 
     public User addUser(UserDTO user) {
-        User entityUser = new User(
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword(),
-                randomSalt()
-                );
+        String salt = randomSalt();
+        @Valid User entityUser = new User(
+        user.getUsername(),
+        user.getEmail(),
+        stringHasher(user.getPassword(), salt),
+        salt
+        );
         return userRepository.save(entityUser);
     }
 
@@ -64,7 +66,7 @@ public class UserServices {
         Optional<User> UserOptional = userRepository.findById(id);
         if(UserOptional.isPresent()){
             User user = UserOptional.get();
-            // updating the salt too just ot be nice
+            // updating the salt just ot be nice
             String newSalt = randomSalt();
             user.setSalt(newSalt);
             user.setPassword(stringHasher(inputPassword, newSalt));

@@ -1,6 +1,7 @@
 package dk.lucashermann.pawshelter2.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +15,10 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
     @Column(name = "password", nullable = false)
+    @Size(min = 64, max = 64)
     private String password;
-    @Column (name = "salt", nullable = false)
+    @Column(name = "salt", nullable = false)
+    @Size(min = 32, max = 32)
     private String salt;
 
     public User() {
