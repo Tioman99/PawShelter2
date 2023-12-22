@@ -22,7 +22,8 @@ public class UserController {
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@RequestBody @Valid UserDTO user) {
         try {
-            return ResponseEntity.ok(userService.addUser(user));
+            userService.addUser(user);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
