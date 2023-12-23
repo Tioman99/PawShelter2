@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {"dk.lucashermann.pawshelter2.services"})
 @ComponentScan(basePackages = {"dk.lucashermann.pawshelter2.models"})
 @ComponentScan(basePackages = {"dk.lucashermann.pawshelter2.repositories"})
+@ComponentScan(basePackages = {"dk.lucashermann.pawshelter2.config"})
 public class PawShelter2Application {
 
     public static void main(String[] args) {
