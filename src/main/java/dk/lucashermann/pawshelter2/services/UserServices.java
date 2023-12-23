@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServices {
@@ -22,12 +23,20 @@ public class UserServices {
         this.userRepository = userRepository;
     }
 
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> findAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public UserDTO findByEmail(String email) {
+        Optional<User> userOPtional = userRepository.findByEmail(email);
+        if(userOPtional.isPresent()){
+            return convertToDTO(userOPtional.get());
+        } else {
+            throw new EntityNotFoundException("User with Email " + email + " not found");
+        }
     }
 
     public User addUser(UserDTO user) {
@@ -41,29 +50,28 @@ public class UserServices {
         return userRepository.save(entityUser);
     }
 
-    public User updateUserName(Long id, String name) {
-        Optional<User> userOptional = userRepository.findById(id);
+    public User updateUserName(String email, String name) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
         if(userOptional.isPresent()){
             User user = userOptional.get();
             user.setUsername(name);
             return userRepository.save(user);
         } else
-            throw new EntityNotFoundException("User with ID" + id + " not found");
+            throw new EntityNotFoundException("User with Email " + email + " not found");
     }
 
-    public User updateUserEmail(Long id, String email) {
-        Optional<User> UserOptional = userRepository.findById(id);
+    public User updateUserEmail(String oldemail, String email) {
+        Optional<User> UserOptional = userRepository.findByEmail(oldemail);
         if(UserOptional.isPresent()){
             User user = UserOptional.get();
             user.setEmail(email);
             return userRepository.save(user);
         } else
-            throw new EntityNotFoundException("User with ID" + id + " not found");
-
+            throw new EntityNotFoundException("User with Email " + email + " not found");
     }
 
-    public User updateUserPassword(Long id, String inputPassword) {
-        Optional<User> UserOptional = userRepository.findById(id);
+    public User updateUserPassword(String email, String inputPassword) {
+        Optional<User> UserOptional = userRepository.findByEmail(email);
         if(UserOptional.isPresent()){
             User user = UserOptional.get();
             // updating the salt just ot be nice
@@ -72,20 +80,22 @@ public class UserServices {
             user.setPassword(stringHasher(inputPassword, newSalt));
             return userRepository.save(user);
         } else
-            throw new EntityNotFoundException("User with ID" + id + " not found");
+            throw new EntityNotFoundException("User with Email " + email + " not found");
     }
 
-    public void removeUser(Long id) {
-        userRepository.deleteById(id);
+    public void removeUser(String email) {
+        userRepository.deleteUserByEmail(email);
     }
 
-    public boolean verifyUser(Long id, String inputPassword) {
-        Optional<User> UserOptional = userRepository.findById(id);
+    public boolean verifyUser(String email, String inputPassword) {
+        Optional<User> UserOptional = userRepository.findByEmail(email);
         if(UserOptional.isPresent()){
             User user = UserOptional.get();
-            return user.getPassword().equals(stringHasher(inputPassword, user.getSalt()));
+            String password = user.getPassword();
+            String salt = user.getSalt();
+            return password.equals(stringHasher(inputPassword, salt));
         } else
-            throw new EntityNotFoundException("User with ID" + id + " not found");
+            throw new EntityNotFoundException("User with Email " + email + " not found");
     }
 
     private String randomSalt() {
@@ -120,6 +130,13 @@ public class UserServices {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private UserDTO convertToDTO(User user) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        return userDTO;
     }
 
 }

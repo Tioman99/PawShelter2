@@ -1,5 +1,6 @@
 package dk.lucashermann.pawshelter2.dataTransferObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Size;
 
 public class UserDTO {
@@ -7,6 +8,8 @@ public class UserDTO {
     private String username;
     private String email;
     @Size(min = 8, message = "Password must be at least 8 characters")
+    @JsonIgnore
+    // excluding password from GET .../users/all and such
     private String password;
 
     public UserDTO() {
