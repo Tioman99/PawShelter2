@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import './UserRegistration.css';
 
-function UserRegistration() {
+function UserLogIn() {
 
     const [error, setError] = useState(null);
 
     const [formData, setFormData] = useState({
-        username: '',
         email: '',
         password: '',
     });
@@ -24,46 +23,45 @@ function UserRegistration() {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:8080/users/add', {
-                method: 'POST',
+            const response = await fetch(`http://localhost:8080/users/verify/${formData.email}?password=${formData.password}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
-            });
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+                .then((data) => {
+                    if (data === true) {
+                        console.log('Log-In successful');
+                        return (
+                            <div>
+                                <Link to="/home">Continue</Link>
+                            </div>
+                        )
+                    } else {
+                        setError('Log-In failed');
+                        console.error('Error:', error);
+                    }
+                })
+                .catch((error) => {
+                    setError('Request failed');
+                    console.error('Error:', error);
+                });
 
-            if (response.ok) {
-                console.log('Registration successful');
-                return (
-                    <div>
-                        <Link to="/login">Continue</Link>
-                    </div>
-                )
-            } else {
-                setError('Registration failed');
-                console.error('Error:', error);
-            }
         } catch (error) {
-            setError('Request failed');
+            setError('Log-In failed');
             console.error('Error:', error);
         }
     };
 
     return (
-        <div className="user-registration-form">
+        <div className="user-login-form">
             <h2>Register</h2>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="username">Name:</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
                 <div>
                     <label htmlFor="email">Email:</label>
                     <input
@@ -89,8 +87,11 @@ function UserRegistration() {
                 <button type="submit">Register</button>
             </form>
             {error && <div className="error-message">{error}</div>}
+            <div>
+                <Link to="/register">Create new user</Link>
+            </div>
         </div>
     );
 }
 
-export default UserRegistration;
+export default UserLogIn;
